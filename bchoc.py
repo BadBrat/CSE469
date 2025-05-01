@@ -243,10 +243,15 @@ elif command == "add":
     # Move file pointer to end for appending
     f.seek(0, os.SEEK_END)
     for idx, val in enumerate(clean_ids):
-        prev_hash = last_block_hash  # link to previous block (or initial)
-        state = "CHECKEDIN"
+        if idx == 0:
+            # genesis block's prev_hash is all zeros
+            prev_hash = blocks[0]["prev_hash"] if blocks else b'\x00' * 32
+        else:
+            prev_hash = last_block_hash
+
+        state   = "CHECKEDIN"
         creator = creator_name[:12]
-        owner = creator_name[:12]      # initial owner is the creator
+        owner   = ""          # owner must be 12 null-bytes for a fresh check-in
         data_bytes = b""
         data_len = len(data_bytes)
         # Prepare encrypted fields
@@ -367,16 +372,30 @@ elif command == "checkin":
         sys.exit(1)
     case_uuid = last_block["case_id"]
     # Append CHECKEDIN block (return to custody)
+    
+
+
+
+    # Link to the tip of the chain
     prev_hash = blocks[-1]["hash"]
-    state = "CHECKEDIN"
-    # Last owner is in the last block's owner field
-    last_owner_role = last_block["owner"][:12] if last_block["owner"] else ""
-    # Original evidence manager who will receive it (from first block of item)
-    first_block = next(b for b in item_blocks if b["state"] == "CHECKEDIN")
-    evidence_manager = first_block["creator"] or first_block["owner"]
-    evidence_manager = evidence_manager[:12]
-    new_creator = last_owner_role      # person returning it
-    new_owner = evidence_manager       # back to evidence manager
+    state     = "CHECKEDIN"
+
+    # Figure out which role just ran `checkin -p PASSWORD`
+    pwd  = args[args.index("-p") + 1]
+    role = None
+    for r, pw in role_passwords.items():
+        if r != "CREATOR" and pw == pwd:
+            role = r[:12]
+            break
+
+    # The “creator” of this new check-in block is always the original evidence manager
+    first_block    = next(b for b in item_blocks if b["state"] == "CHECKEDIN")
+    new_creator    = first_block["creator"][:12]
+
+    # The “owner” of this block is the person doing the checkin (the role you just derived)
+    new_owner      = (role or "").ljust(12, "\0")[:12]
+
+
     data_bytes = b""
     case_enc = encrypt_case(case_uuid)
     item_enc = encrypt_item_id(item_val)
@@ -402,7 +421,7 @@ elif command == "checkin":
     sys.exit(0)
 
 elif command == "remove":
-    if "-i" not in args or "-y" not in args:
+    if "-i" not in args or ("-y" not in args and "-why" not in args):
         print_line("Usage: bchoc remove -i <item_id> -y <reason> -p <password>")
         sys.exit(1)
     try:
@@ -412,7 +431,10 @@ elif command == "remove":
         print_line("Invalid item ID")
         sys.exit(1)
     try:
-        reason_idx = args.index("-y")
+        if "-y" in args:
+            reason_idx = args.index("-y")
+        else:
+            reason_idx = args.index("--why")
         reason_text = args[reason_idx + 1]
     except Exception:
         print_line("Removal reason not provided")
