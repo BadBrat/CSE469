@@ -421,7 +421,7 @@ elif command == "checkin":
     sys.exit(0)
 
 elif command == "remove":
-    if "-i" not in args and ("-y" not in args or "-why" not in args):
+    if "-i" not in args and ("-y" not in args and "--why" not in args):
         print_line("Usage: bchoc remove -i <item_id> -y <reason> -p <password>")
         sys.exit(1)
     try:
