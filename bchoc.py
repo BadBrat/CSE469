@@ -439,6 +439,13 @@ elif command == "remove":
     except Exception:
         print_line("Removal reason not provided")
         sys.exit(1)
+
+    # Check for valid Reason
+    valid_reasons = {"DISPOSED", "DESTROYED", "RELEASED"}
+    if reason_text not in valid_reasons:
+        print_line("Invalid removal reason")
+        sys.exit(1)
+
     # Only creator can remove
     if not check_password("CREATOR"):
         print_line("Invalid password")
