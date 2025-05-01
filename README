@@ -1,0 +1,29 @@
+CSE469
+README
+Name: Tamanna Nolastname
+      Benjamin Smith
+      Justin Boyd
+      Om Sunil Chaudhari
+ASU ID: 1227125031
+        1221783069
+        1220920896
+        1222092534
+
+Project Description:
+
+This program is a digital implementation of a Chain of Custody (CHOC) system designed for digital forensics. It allows users to securely manage and track the history of digital evidence by storing all actions (add, checkout, checkin, remove, etc.) in a custom-built blockchain. The immutability and transparency of the blockchain ensure that the integrity of the digital evidence is preserved throughout its lifecycle.
+
+Each action on the evidence (add, checkout, etc.) is encapsulated as a block, containing encrypted case and item identifiers, a timestamp, user information, and state changes. Blocks are linked via cryptographic hashes and stored in binary format in a file specified by the BCHOC_FILE_PATH environment variable.
+
+Features:
+
+- Initializes blockchain with a genesis block (`bchoc init`)
+- Adds new evidence to a case (`bchoc add`)
+- Checks out/in evidence for analysis (`bchoc checkout`, `bchoc checkin`)
+- Displays existing cases and items (`bchoc show cases`, `bchoc show items`)
+- Shows blockchain history of evidence (`bchoc show history`)
+- Securely removes evidence (`bchoc remove`)
+- Validates blockchain integrity (`bchoc verify`)
+- Provides item status summaries (`bchoc summary`)
+
+Data is encrypted using AES (ECB mode), and stored in strict binary format. Timestamps are stored in UTC. All access is protected via passwords mapped to environment variables. The program exits with a non-zero status on any error, following UNIX conventions.
