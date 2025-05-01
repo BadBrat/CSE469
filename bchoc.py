@@ -609,10 +609,8 @@ elif command == "show":
             print_line(f"Time: {ts.strftime('%Y-%m-%dT%H:%M:%S.%fZ')}")
             if idx != len(history) - 1:
                 print_line("")  # blank line separator
-        sys.exit(0)
-    else:
-        print_line("Unknown show command")
-        sys.exit(1)
+    sys.exit(0)
+    
 
 elif command == "summary":
     if "-c" not in args:
@@ -698,6 +696,12 @@ elif command == "verify":
         last_state = {}
         for blk in blocks[1:]:
             action = blk["state"]
+
+            if action == "REMOVED" and blk["item_id"] not in last_state:
+                state = "ERROR"
+                bad_block_hash = blk["hash"].hex();
+                error_note = f"Item removed before add for item {blk['item_id']}."
+                break
             if action in ("CHECKEDIN", "CHECKEDOUT", "REMOVED"):
                 item = blk["item_id"]
             # if the same action repeats for the same item → error
