@@ -135,6 +135,9 @@ if not args:
     print_line("No command provided")
     sys.exit(1)
 command = args[0].lower()
+if command == "log":
+    args.insert(1,"history")
+    command = "show"
 
 # Helper for password checks
 def check_password(role_required=None):
@@ -583,8 +586,6 @@ elif command == "show":
         # Gather matching entries
         history = []
         for blk in blocks:
-            if blk["state"] == "INITIAL":
-                continue
             if case_filter and blk["case_id"] != case_filter:
                 continue
             if item_filter is not None and blk["item_id"] != item_filter:
