@@ -27,3 +27,46 @@ Features:
 - Provides item status summaries (`bchoc summary`)
 
 Data is encrypted using AES (ECB mode), and stored in strict binary format. Timestamps are stored in UTC. All access is protected via passwords mapped to environment variables. The program exits with a non-zero status on any error, following UNIX conventions.
+
+
+# CSE469
+> Group 10
+> Members: Om Sunil Chaudhari, Justin Boyd, Benjamin Smith, Tamanna Nolastname 
+
+
+# Description: 
+> The following program implements a secure blockchain for chain of custody forms.
+> This blockchain implements the following features:
+
+1. init: 
+This function determines if the blockchain file is present. If not, it creates a genesis block and initializes the blockchain. If the file exists, it verifies its presence.   
+
+2. add -c case_id -i item_id [-i item_id...] -g creator -p password:  
+Adds an evidence item, or a list of items, to a case. Requires the name of the creator and their password to add successfully.  
+
+3. checkout -i item_id -p password:
+After verifying the owner's password, it checks out an item for investigation and adds a CHECKEDOUT block.  
+
+4. checkin -i item_id -p password
+After verifying the owner's password, it checks the item back into custody and adds a CHECKEDIN block.
+
+5. remove -i item_id -y reason -p password
+After verifying the owner's password and providing a reason for removal, it ensures the selected item is CHECKEDIN and removes it from the chain, adding a REMOVED block.   
+
+6. show cases
+If authorized it lists all case IDs, case IDs encrypted if not authorized.
+
+7. show items -c case_id
+List all the item IDs in a selected case
+
+8. show history [-c case_id] [-i item_id] [-n num_entries] [-r] -p password
+Shows the activity history of a given case with additional filter options for a certain item ID and/or number of entries. Output is encrypted unless authorized access. 
+
+9. summary -c item_id
+Shows the total number of CHECKEDIN, CHECKEDOUT, and removed items in a case.
+
+10. verify
+Validates the blockchain by checking for the following: Genesis block, duplicate previous hashes, sequential linking, bad blocks and messages, and actions after removal
+
+
+
