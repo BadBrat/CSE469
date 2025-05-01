@@ -421,7 +421,7 @@ elif command == "checkin":
     sys.exit(0)
 
 elif command == "remove":
-    if "-i" not in args or ("-y" not in args and "-why" not in args):
+    if "-i" not in args and ("-y" not in args or "-why" not in args):
         print_line("Usage: bchoc remove -i <item_id> -y <reason> -p <password>")
         sys.exit(1)
     try:
@@ -686,6 +686,21 @@ elif command == "verify":
                     bad_block_hash = prev["hash"].hex()
                     error_note = "Block contents do not match block checksum."
                 break
+    # Check duplicate state transitions (double check-in, check-out or remove)
+    if state == "CLEAN":
+        last_state = {}
+        for blk in blocks[1:]:
+            action = blk["state"]
+            if action in ("CHECKEDIN", "CHECKEDOUT", "REMOVED"):
+                item = blk["item_id"]
+            # if the same action repeats for the same item → error
+                if last_state.get(item) == action:
+                    state = "ERROR"
+                    bad_block_hash = blk["hash"].hex()
+                    error_note = f"Duplicate {action} for item {item}."
+                    break
+                last_state[item] = action
+
     # Check no actions after removal
     if state == "CLEAN":
         removed_items = set()
